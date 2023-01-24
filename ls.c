@@ -62,16 +62,24 @@ ls(char *path)
         continue;
       memmove(p, de.name, DIRSIZ);
       p[DIRSIZ] = 0;
+
+
       if(stat(buf, &st) < 0){
         printf(1, "ls: cannot stat %s\n", buf);
         continue;
       }
+
+      if (de.name[0] != '.'){
+      	
+      
+
       if (st.type == 1){
 	printf(1, "%s/\t %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);      	
 
       }
-      else if (st.type==2){
+      else if (st.type!=1){
       	printf(1, "%s\t %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+      }
       }
     }
     break;
