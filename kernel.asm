@@ -10176,29 +10176,56 @@ procdump(void)
 8010568f:	90                   	nop
 
 80105690 <sys_fork>:
+#include "proc.h"
+
+int
+sys_fork(void)
+{
+  return fork();
 80105690:	e9 7b e4 ff ff       	jmp    80103b10 <fork>
 80105695:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 8010569c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
 
 801056a0 <sys_exit>:
+}
+
+int
+sys_exit(void)
+{
 801056a0:	55                   	push   %ebp
 801056a1:	89 e5                	mov    %esp,%ebp
 801056a3:	83 ec 08             	sub    $0x8,%esp
+  exit();
 801056a6:	e8 e5 e6 ff ff       	call   80103d90 <exit>
+  return 0;  // not reached
+}
 801056ab:	31 c0                	xor    %eax,%eax
 801056ad:	c9                   	leave  
 801056ae:	c3                   	ret    
 801056af:	90                   	nop
 
 801056b0 <sys_wait>:
+
+int
+sys_wait(void)
+{
+  return wait();
 801056b0:	e9 0b e8 ff ff       	jmp    80103ec0 <wait>
 801056b5:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 801056bc:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
 
 801056c0 <sys_kill>:
+}
+
+int
+sys_kill(void)
+{
 801056c0:	55                   	push   %ebp
 801056c1:	89 e5                	mov    %esp,%ebp
 801056c3:	83 ec 20             	sub    $0x20,%esp
+  int pid;
+
+  if(argint(0, &pid) < 0)
 801056c6:	8d 45 f4             	lea    -0xc(%ebp),%eax
 801056c9:	50                   	push   %eax
 801056ca:	6a 00                	push   $0x0
@@ -10206,126 +10233,203 @@ procdump(void)
 801056d1:	83 c4 10             	add    $0x10,%esp
 801056d4:	85 c0                	test   %eax,%eax
 801056d6:	78 18                	js     801056f0 <sys_kill+0x30>
+    return -1;
+  return kill(pid);
 801056d8:	83 ec 0c             	sub    $0xc,%esp
 801056db:	ff 75 f4             	push   -0xc(%ebp)
 801056de:	e8 7d ea ff ff       	call   80104160 <kill>
 801056e3:	83 c4 10             	add    $0x10,%esp
+}
 801056e6:	c9                   	leave  
 801056e7:	c3                   	ret    
 801056e8:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 801056ef:	90                   	nop
 801056f0:	c9                   	leave  
+    return -1;
 801056f1:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+}
 801056f6:	c3                   	ret    
 801056f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 801056fe:	66 90                	xchg   %ax,%ax
 
 80105700 <sys_getpid>:
+
+int
+sys_getpid(void)
+{
 80105700:	55                   	push   %ebp
 80105701:	89 e5                	mov    %esp,%ebp
 80105703:	83 ec 08             	sub    $0x8,%esp
+  return myproc()->pid;
 80105706:	e8 65 e2 ff ff       	call   80103970 <myproc>
 8010570b:	8b 40 10             	mov    0x10(%eax),%eax
+}
 8010570e:	c9                   	leave  
 8010570f:	c3                   	ret    
 
 80105710 <sys_sbrk>:
+
+int
+sys_sbrk(void)
+{
 80105710:	55                   	push   %ebp
 80105711:	89 e5                	mov    %esp,%ebp
 80105713:	53                   	push   %ebx
+  int addr;
+  int n;
+
+  if(argint(0, &n) < 0)
 80105714:	8d 45 f4             	lea    -0xc(%ebp),%eax
+{
 80105717:	83 ec 1c             	sub    $0x1c,%esp
+  if(argint(0, &n) < 0)
 8010571a:	50                   	push   %eax
 8010571b:	6a 00                	push   $0x0
 8010571d:	e8 fe f1 ff ff       	call   80104920 <argint>
 80105722:	83 c4 10             	add    $0x10,%esp
 80105725:	85 c0                	test   %eax,%eax
 80105727:	78 27                	js     80105750 <sys_sbrk+0x40>
+    return -1;
+  addr = myproc()->sz;
 80105729:	e8 42 e2 ff ff       	call   80103970 <myproc>
+  if(growproc(n) < 0)
 8010572e:	83 ec 0c             	sub    $0xc,%esp
+  addr = myproc()->sz;
 80105731:	8b 18                	mov    (%eax),%ebx
+  if(growproc(n) < 0)
 80105733:	ff 75 f4             	push   -0xc(%ebp)
 80105736:	e8 55 e3 ff ff       	call   80103a90 <growproc>
 8010573b:	83 c4 10             	add    $0x10,%esp
 8010573e:	85 c0                	test   %eax,%eax
 80105740:	78 0e                	js     80105750 <sys_sbrk+0x40>
+    return -1;
+  return addr;
+}
 80105742:	89 d8                	mov    %ebx,%eax
 80105744:	8b 5d fc             	mov    -0x4(%ebp),%ebx
 80105747:	c9                   	leave  
 80105748:	c3                   	ret    
 80105749:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
+    return -1;
 80105750:	bb ff ff ff ff       	mov    $0xffffffff,%ebx
 80105755:	eb eb                	jmp    80105742 <sys_sbrk+0x32>
 80105757:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 8010575e:	66 90                	xchg   %ax,%ax
 
 80105760 <sys_sleep>:
+
+int
+sys_sleep(void)
+{
 80105760:	55                   	push   %ebp
 80105761:	89 e5                	mov    %esp,%ebp
 80105763:	53                   	push   %ebx
+  int n;
+  uint ticks0;
+
+  if(argint(0, &n) < 0)
 80105764:	8d 45 f4             	lea    -0xc(%ebp),%eax
+{
 80105767:	83 ec 1c             	sub    $0x1c,%esp
+  if(argint(0, &n) < 0)
 8010576a:	50                   	push   %eax
 8010576b:	6a 00                	push   $0x0
 8010576d:	e8 ae f1 ff ff       	call   80104920 <argint>
 80105772:	83 c4 10             	add    $0x10,%esp
 80105775:	85 c0                	test   %eax,%eax
 80105777:	0f 88 8a 00 00 00    	js     80105807 <sys_sleep+0xa7>
+    return -1;
+  acquire(&tickslock);
 8010577d:	83 ec 0c             	sub    $0xc,%esp
 80105780:	68 80 3c 11 80       	push   $0x80113c80
 80105785:	e8 16 ee ff ff       	call   801045a0 <acquire>
+  ticks0 = ticks;
+  while(ticks - ticks0 < n){
 8010578a:	8b 55 f4             	mov    -0xc(%ebp),%edx
+  ticks0 = ticks;
 8010578d:	8b 1d 60 3c 11 80    	mov    0x80113c60,%ebx
+  while(ticks - ticks0 < n){
 80105793:	83 c4 10             	add    $0x10,%esp
 80105796:	85 d2                	test   %edx,%edx
 80105798:	75 27                	jne    801057c1 <sys_sleep+0x61>
 8010579a:	eb 54                	jmp    801057f0 <sys_sleep+0x90>
 8010579c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
+    if(myproc()->killed){
+      release(&tickslock);
+      return -1;
+    }
+    sleep(&ticks, &tickslock);
 801057a0:	83 ec 08             	sub    $0x8,%esp
 801057a3:	68 80 3c 11 80       	push   $0x80113c80
 801057a8:	68 60 3c 11 80       	push   $0x80113c60
 801057ad:	e8 8e e8 ff ff       	call   80104040 <sleep>
+  while(ticks - ticks0 < n){
 801057b2:	a1 60 3c 11 80       	mov    0x80113c60,%eax
 801057b7:	83 c4 10             	add    $0x10,%esp
 801057ba:	29 d8                	sub    %ebx,%eax
 801057bc:	3b 45 f4             	cmp    -0xc(%ebp),%eax
 801057bf:	73 2f                	jae    801057f0 <sys_sleep+0x90>
+    if(myproc()->killed){
 801057c1:	e8 aa e1 ff ff       	call   80103970 <myproc>
 801057c6:	8b 40 24             	mov    0x24(%eax),%eax
 801057c9:	85 c0                	test   %eax,%eax
 801057cb:	74 d3                	je     801057a0 <sys_sleep+0x40>
+      release(&tickslock);
 801057cd:	83 ec 0c             	sub    $0xc,%esp
 801057d0:	68 80 3c 11 80       	push   $0x80113c80
 801057d5:	e8 66 ed ff ff       	call   80104540 <release>
+  }
+  release(&tickslock);
+  return 0;
+}
 801057da:	8b 5d fc             	mov    -0x4(%ebp),%ebx
+      return -1;
 801057dd:	83 c4 10             	add    $0x10,%esp
 801057e0:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+}
 801057e5:	c9                   	leave  
 801057e6:	c3                   	ret    
 801057e7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 801057ee:	66 90                	xchg   %ax,%ax
+  release(&tickslock);
 801057f0:	83 ec 0c             	sub    $0xc,%esp
 801057f3:	68 80 3c 11 80       	push   $0x80113c80
 801057f8:	e8 43 ed ff ff       	call   80104540 <release>
+  return 0;
 801057fd:	83 c4 10             	add    $0x10,%esp
 80105800:	31 c0                	xor    %eax,%eax
+}
 80105802:	8b 5d fc             	mov    -0x4(%ebp),%ebx
 80105805:	c9                   	leave  
 80105806:	c3                   	ret    
+    return -1;
 80105807:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
 8010580c:	eb f4                	jmp    80105802 <sys_sleep+0xa2>
 8010580e:	66 90                	xchg   %ax,%ax
 
 80105810 <sys_uptime>:
+
+// return how many clock tick interrupts have occurred
+// since start.
+int
+sys_uptime(void)
+{
 80105810:	55                   	push   %ebp
 80105811:	89 e5                	mov    %esp,%ebp
 80105813:	53                   	push   %ebx
 80105814:	83 ec 10             	sub    $0x10,%esp
+  uint xticks;
+
+  acquire(&tickslock);
 80105817:	68 80 3c 11 80       	push   $0x80113c80
 8010581c:	e8 7f ed ff ff       	call   801045a0 <acquire>
+  xticks = ticks;
 80105821:	8b 1d 60 3c 11 80    	mov    0x80113c60,%ebx
+  release(&tickslock);
 80105827:	c7 04 24 80 3c 11 80 	movl   $0x80113c80,(%esp)
 8010582e:	e8 0d ed ff ff       	call   80104540 <release>
+  return xticks;
+}
 80105833:	89 d8                	mov    %ebx,%eax
 80105835:	8b 5d fc             	mov    -0x4(%ebp),%ebx
 80105838:	c9                   	leave  
