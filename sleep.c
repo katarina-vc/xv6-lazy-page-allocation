@@ -9,7 +9,7 @@ main(int argc, char *argv[])
 {
 
   if(argc < 2){
-  	printf(1, "No arguments provided.");
+  	printf(1, "No arguments provided.\n");
 	exit();
   }	  
 
