@@ -13,49 +13,47 @@ struct findCommandStruct {
 	int  size;
 };
 
+char* formatFileName(char *namePath)
+{
+	static char newBuf[DIRSIZ+1];
+	char *newPath;
+
+	for(newPath=namePath+strlen(namePath); newPath >= namePath && *newPath != '/'; newPath--)
+		;
+	newPath++;
+
+	if(strlen(newPath) >= DIRSIZ)
+		return newPath;
+	
+	memmove(newBuf, newPath, strlen(newPath));
+        memset(newBuf+strlen(newPath), ' ', DIRSIZ-strlen(newPath));
+	return newBuf;
+}
+
 char* fmtname(char *path)
 {
-	static char buf[DIRSIZ+1];
-	char *p;
+	  static char buf[DIRSIZ+1];
+	  char *p;
 
-	for(p=path+strlen(path); p >= path && *p != '/'; p--)
-		;
-	p++;
+	      for(p=path+strlen(path); p >= path && *p != '/'; p--)
+		          ;
+	        p++;
 
-	if(strlen(p) >= DIRSIZ)
-		return p;
-	
-	memmove(buf, p, strlen(p));
-        memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
-	return buf;
+		  if(strlen(p) >= DIRSIZ)
+			      return p;
+	   memmove(buf, p, strlen(p));
+		      memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+		        return buf;
 }
 
 void find(struct findCommandStruct findCommand)
 {
-	//static char buf[512], *p;
-	//struct dirent de;
 	struct stat statObj;
 
 	// A file descriptor is an unsigned int used by a process to identify an open file. 
 	int fileDescriptor;
-
-	if(findCommand.folderName == NULL){
-		      if((fileDescriptor = open(findCommand.fileName, 0)) < 0){   
-	              		printf(2, "find: cannot open %s\n", findCommand.fileName);
-				return;
-		      }
-		        
-		      if(fstat(fileDescriptor, &statObj) < 0){
-				printf(2, "find: cannot stat %s\n", findCommand.fileName);
-				close(fileDescriptor);
-			        return;
-		      }
-
-		printf(1, "%s %d %d %d\n", fmtname(findCommand.fileName), statObj.type, statObj.ino, statObj.size);
-		return;
-	} else {
-		static char buf[512], *p;
-		struct dirent de;
+	static char buf[512], *p;
+	struct dirent de;
 		
 		if((fileDescriptor = open(findCommand.folderName, 0)) < 0){ 
 			printf(2, "find: cannot open %s\n", findCommand.folderName);
@@ -77,29 +75,34 @@ void find(struct findCommandStruct findCommand)
     			strcpy(buf, findCommand.folderName);
     			p = buf+strlen(buf);
     			*p++ = '/';
+			
+			char* formattedFileName = formatFileName(findCommand.fileName);
 
     			while(read(fileDescriptor, &de, sizeof(de)) == sizeof(de)){
 	      			if(de.inum == 0)
 		          		continue;
+
 	        		memmove(p, de.name, DIRSIZ);
 	          		p[DIRSIZ] = 0;
+
 	        		if(stat(buf, &statObj) < 0){
 	              			printf(1, "find: cannot stat %s\n", buf);
               				continue;
       				}
-
-				char* newBufName = fmtname(buf);
-
-				printf(1, "\nfileName: %s fileNSize: %d | bufName: %s bufNSize: %d", findCommand.fileName, strlen(findCommand.fileName), newBufName, strlen(newBufName));
-
-				if(strcmp(findCommand.fileName, fmtname(buf)) == 0) {
-        				//printf(1, "SUCCCC %s %s\n", fmtname(buf), findCommand.fileName);
-				} else {
-					//printf(1, "\n Err: filename: %s , foldername: %s fileNameBuf: %s", findCommand.fileName, findCommand.folderName, fmtname(buf));
+				
+				if(statObj.type == T_DIR) {
+					struct findCommandStruct newFindObj;
+					newFindObj.fileName = findCommand.fileName;
+					newFindObj.folderName = fmtname(buf);
+					find(newFindObj);	
+				} 
+				
+				if(strcmp(formattedFileName, fmtname(buf)) == 0) {
+					printf(1,"\n%s", buf); 
 				}
-    			}					
+
+    			}			
 		}
-	} // end if-else (is directory)
 	close(fileDescriptor);  
 } // end find() 
 
@@ -165,8 +168,8 @@ int main(int argc, char *argv[]){
 		} break;
 		case 8: { // If the user passes in 8 arguments, we must assume they are passing in both the -size and -type flags in any order.
 			// If the user specified "type -d" and "-size", throw an error
-			if(strcmp(arg[5], "-type") == 0) {
-				if(strcmp(arg[6], "d") == 0) {
+			if(strcmp(argv[5], "-type") == 0) {
+				if(strcmp(argv[6], "d") == 0) {
 					displayFormattingErrorMsg();
 				}
 				
@@ -176,7 +179,7 @@ int main(int argc, char *argv[]){
 			} else if(strcmp(argv[5], "-size") == 0) {
 				// if the 5th argument is size, then the 6th arg is size specified, and the 7th arg MUST be "-type"
 				if(strcmp(argv[7], "-type") == 0) {
-					if(strcmp(argv[8] ==, "d") == 0) {
+					if(strcmp(argv[8], "d") == 0) {
 						displayFormattingErrorMsg();
 					}
 				} else {
