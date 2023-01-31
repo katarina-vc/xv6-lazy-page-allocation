@@ -56,12 +56,12 @@ void find(struct findCommandStruct findCommand)
 	struct dirent de;
 		
 		if((fileDescriptor = open(findCommand.folderName, 0)) < 0){ 
-			printf(2, "find: cannot open %s\n", findCommand.folderName);
+			printf(2, "\nfind: cannot open %s", findCommand.folderName);
 			return;
 		}
 
 	        if(fstat(fileDescriptor, &statObj) < 0){
-			printf(2, "find: cannot stat %s\n", findCommand.folderName);
+			printf(2, "\nfind: cannot stat %s", findCommand.folderName);
 			close(fileDescriptor);
 			return;
 		}
@@ -85,26 +85,34 @@ void find(struct findCommandStruct findCommand)
 	        		memmove(p, de.name, DIRSIZ);
 	          		p[DIRSIZ] = 0;
 
+				printf(1,"\nsizeofDe: %d | de.inum: %d | de.name: %s\n", sizeof(de), de.inum, de.name);
+
 	        		if(stat(buf, &statObj) < 0){
-	              			printf(1, "find: cannot stat %s\n", buf);
-              				continue;
+	              			printf(1, "find: loop cannot stat %s\n", buf);
+              				return;
       				}
-				
-				if(statObj.type == T_DIR) {
-					struct findCommandStruct newFindObj;
-					newFindObj.fileName = findCommand.fileName;
-					newFindObj.folderName = fmtname(buf);
-					find(newFindObj);	
-				} 
-				
+			     
+				// Check for a match.
 				if(strcmp(formattedFileName, fmtname(buf)) == 0) {
 					printf(1,"\n%s", buf); 
 				}
-
-    			}			
+				
+				// If the statObj is a directory, we need to check that directory for similar folder/file names for our match
+				/*
+				if(statObj.type == T_DIR) {
+					struct findCommandStruct newFindObj;
+					newFindObj.fileName = findCommand.fileName;
+					newFindObj.folderName = "testFold";
+					find(newFindObj);	
+				} */
+    			}// end while() that traverses files in directory			
 		}
-	close(fileDescriptor);  
+	close(fileDescriptor);
+        return;	
 } // end find() 
+
+
+
 
 // start displayFormattingErrorMsg()
 void displayFormattingErrorMsg() {
@@ -197,6 +205,7 @@ int main(int argc, char *argv[]){
 	} // end switch(argc)
 
         find(findCommand);
+	printf(1,"\n");
 
 	exit();
 } // end main()
