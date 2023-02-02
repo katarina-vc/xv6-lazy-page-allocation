@@ -11,6 +11,13 @@
 
 ## Implementation Notes
 
+### `ls` Command Implementation Notes
+The ls command was implemented as advised on the Canvas instructions page. The ls command hides hidden files by checking if there is "." at the start of the file name. Additionally, it checks if a file type of a current entry is a folder, and if there is so, it appends "/" to the end of the file. Additionally, the flag `-a` makes it possible to display hidden files. 
+
+### `sleep` Command Implementation Notes
+This instruction followed the guidelines of Dr. Kim. Particluraly, it accepts an integer number that indicates the number of CPU Clock Ticks the sleep command is going to be working for. Then it passes the argument to the sleep system class. To make it easier for users to use this function, we added it to the makefile so that users can call it from the terminal. 
+
+
 ### `find` Command Implementation Notes
 The find command has been implemented, as per Professor Gene Kim's instructions, the user MUST specify the "-name" flag at the very least in order to use the command. Additionally, the user cannot use regex to find files.
 
