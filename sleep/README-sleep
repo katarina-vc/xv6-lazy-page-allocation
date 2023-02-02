@@ -1,3 +1,7 @@
 # README-sleep - sleep implementation output - Operating Systems - Project 1
 
 This sleep folder contains screenshots of output for each of the grading criteria for sleep for this project.
+
+This function performs the sleep opeartion and accepts an integer argument. The integer agrument must be a integer value that represent the number of CPU clock cycles that they sleep command will wait for. 
+Works as exptected with Canvas examples and the results are shown in .png files in this folder.
+
