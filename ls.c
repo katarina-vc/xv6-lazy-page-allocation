@@ -4,26 +4,36 @@
 #include "fs.h"
 
 char*
-fmtname(char *path)
+fmtname(char *path, int type)
 {
   static char buf[DIRSIZ+1];
-  char *p;
+  char *p; 
 
   // Find first character after last slash.
+
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
-  p++;
+  p += 1;
 
-  // Return blank-padded name.
+  if(type==T_DIR){	
+  char *q; 
+  for(q=path; *(q) != '\0'; q++);
+  *q = '/';
+  }
+
+
   if(strlen(p) >= DIRSIZ)
     return p;
-  memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  
+
+  memmove(buf, p, strlen(p)+1);
+
+  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p)-1);
   return buf;
 }
 
 void
-ls(char *path)
+ls(char *path, int hide)
 {
   char buf[512], *p;
   int fd;
@@ -43,7 +53,8 @@ ls(char *path)
 
   switch(st.type){
   case T_FILE:
-    printf(1, "%s %d %d %d\n", fmtname(path), st.type, st.ino, st.size);
+    if(de.name[0] != '.' && hide != 0)	  
+    	printf(1, "%s %d %d %d\n", fmtname(path, st.type), st.type, st.ino, st.size);
     break;
 
   case T_DIR:
@@ -57,13 +68,23 @@ ls(char *path)
     while(read(fd, &de, sizeof(de)) == sizeof(de)){
       if(de.inum == 0)
         continue;
-      memmove(p, de.name, DIRSIZ);
+
+      if(de.name[0] == '.' && hide == 0){
+      	continue;
+      }
+
+      memmove(p, de.name, DIRSIZ+1);
+
       p[DIRSIZ] = 0;
+  	
+
       if(stat(buf, &st) < 0){
         printf(1, "ls: cannot stat %s\n", buf);
         continue;
       }
-      printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+
+      char *result = fmtname(buf, st.type);
+      printf(1, "%s %d %d %d\n", result, st.type, st.ino, st.size);
     }
     break;
   }
@@ -75,11 +96,25 @@ main(int argc, char *argv[])
 {
   int i;
 
+  // execute the following if no arguments
+
   if(argc < 2){
-    ls(".");
+    ls(".", 0);
     exit();
   }
-  for(i=1; i<argc; i++)
-    ls(argv[i]);
+
+  // itterate through files
+  int flag = 0;
+  for(i=1; i<argc; i++){
+     if(strcmp(argv[i], "-a") == 0)
+     	flag = 1;   
+  }
+ 
+  ls(".", flag);
+  
+ 
+
   exit();
 }
+
+
