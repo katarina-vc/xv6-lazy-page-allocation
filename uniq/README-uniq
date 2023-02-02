@@ -1,3 +1,5 @@
 # README-uniq - uniq implementation output - Operating Systems - Project 1
 
 This uniq folder contains screenshots of output for each of the grading criteria for uniq for this project.
+
+The file used in testing was generated using "cat >> uniqTest" and typing in the test phrases line by line.
