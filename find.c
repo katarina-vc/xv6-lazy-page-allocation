@@ -186,8 +186,7 @@ void findBothFlags(struct findCommandStruct findCmd, struct stat statObj, char *
                 }
             }
         } else {
-            // If there is no type to be found, then something went wrong somewhere. Display error message and quit.
-            displayFormattingErrorMsg();
+		continue;
         }
     } 
 
