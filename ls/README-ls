@@ -1,2 +1,5 @@
 #README ls Implementation - Operating Systems - Project 1
 This ls folder contains screenshots showing outputs for each of the grading criteria for the ls portion of the project.
+
+For this file, we implemented an ls command that displays files in a specific directory. For repostories it adds "/" at the end. With a "-a" flag it also displays hidden files.
+The file was tested with Canvas examples and expected results. Examples can be found in this folder as .png files.
