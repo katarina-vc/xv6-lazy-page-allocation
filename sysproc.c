@@ -7,6 +7,30 @@
 #include "mmu.h"
 #include "proc.h"
 
+//JTM - Implement system calls for priority scheduler
+int
+sys_set_sched_priority(void){
+  int priority;
+  
+  if(argint(0, &priority) < 0){
+    return -1;
+  }
+  
+  set_sched_priority(priority);
+  return 0;
+}
+
+int
+sys_get_sched_priority(void){
+  int pid;
+
+  if(argint(0, &pid) < 0){
+    return -1;
+  }
+
+  return get_sched_priority(pid);
+}
+
 int
 sys_fork(void)
 {

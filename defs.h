@@ -121,6 +121,10 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
+//JTM - Allow these system calls to be defined in proc.c
+void		set_sched_priority(int);
+int		get_sched_priority(int);
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 

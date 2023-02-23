@@ -20,6 +20,15 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+//JTM - Define global constants for the number of priority levels & the default priority level.
+//Lower number = Higher priority (meaning 1 is the highest priority, NUM_PRIORITY_LEVELS is the lowest priority.
+const int NUM_PRIORITY_LEVELS = 10;
+const int DEFAULT_PRIORITY = NUM_PRIORITY_LEVELS / 2;
+
+//JTM - Define these functions with the attribute noreturn
+void defaultScheduler(void)  __attribute__((noreturn));
+void priorityScheduler(void)  __attribute__((noreturn));
+
 void
 pinit(void)
 {
@@ -89,6 +98,11 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
+  //JTM - Set default process priority
+#ifdef PRIORITY
+  p->priority = DEFAULT_PRIORITY;
+#endif
+
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -149,6 +163,9 @@ userinit(void)
   acquire(&ptable.lock);
 
   p->state = RUNNABLE;
+
+  //JTM - Also establish first process's priority
+  p->priority = 1;
 
   release(&ptable.lock);
 }
@@ -311,17 +328,119 @@ wait(void)
   }
 }
 
-//PAGEBREAK: 42
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
-// Scheduler never returns.  It loops, doing:
-//  - choose a process to run
-//  - swtch to start running that process
-//  - eventually that process transfers control
-//      via swtch back to the scheduler.
+// JTM - Begin Priority Scheduler implementation
+
 void
-scheduler(void)
-{
+priorityScheduler(void){
+
+	cprintf("Using the PRIORITY scheduler...\n");
+
+	//Define necessary structures
+	struct proc *p;
+	struct cpu *c = mycpu();
+ 	c->proc = 0;
+  
+  	for(;;){
+    		//Enable interrupts on this processor
+    		sti();
+
+		//Define local variables holding the highest priority & pid
+		int highestPriority = NUM_PRIORITY_LEVELS;
+		struct proc *highestPriorityProcess;
+
+    		//Acquire process table lock
+    		acquire(&ptable.lock);
+
+		//Initialize the highest priority process as the first process in the list
+		highestPriorityProcess = ptable.proc;
+
+		//Loop over process table looking for the highest priority process
+    		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+			//If process is runnable and its priority is lower than the highest priority...
+      			if(p->state == RUNNABLE && p->priority < highestPriority){
+				//Grab the first process in that priority class (this results in FIFO scheduling for processes with the same priority)
+				highestPriorityProcess = p;
+
+				//Update the highest priority
+				highestPriority = p->priority;
+			}
+
+      		}
+
+		// Switch to highest priority process
+      		c->proc = highestPriorityProcess;
+      		switchuvm(highestPriorityProcess);
+      		highestPriorityProcess->state = RUNNING;
+
+     		swtch(&(c->scheduler), highestPriorityProcess->context);
+     		switchkvm();
+
+      		//When process is done, set the cpu's process to null
+      		c->proc = 0;
+
+		//Release process table lock
+    		release(&ptable.lock);
+
+  	}
+}
+
+void
+set_sched_priority(int priority){
+	//Ensure priority does not exceed the number of levels
+	if(priority < 1 || priority > NUM_PRIORITY_LEVELS){
+		panic("\nset_sched_priority: given priority level exceeds the bounds");
+	}
+
+	//Obtain the currently running process
+	struct proc *p = myproc();
+
+	//Acquire process table lock
+	acquire(&ptable.lock);
+
+	//Set the process priority to the new one
+	p->priority = priority;
+
+	//Release process table lock
+	release(&ptable.lock);
+
+}
+
+int
+get_sched_priority(int pid){
+
+	//Define local variable to hold priority & proc structure
+	struct proc *p;
+	int priority = -1;
+	
+	//Acquire process table lock
+	acquire(&ptable.lock);
+
+	//Loop through the process table to find the matching pid
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(p->pid == pid){
+			//Assign priority variable to match the process's priority
+			priority = p->priority;
+			break;
+		}
+
+	}
+
+	//Release process table lock
+	release(&ptable.lock);
+
+	//Return the priority
+	return priority;
+}
+
+// JTM - End Priority Scheduler implementation
+
+
+// JTM - Separate default scheduler code into its own function
+void
+defaultScheduler(void){
+ 
+  cprintf("Using the DEFAULT scheduler...\n");
+
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
@@ -350,9 +469,51 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
+
     release(&ptable.lock);
 
   }
+
+}
+
+//PAGEBREAK: 42
+// Per-CPU process scheduler.
+// Each CPU calls scheduler() after setting itself up.
+// Scheduler never returns.  It loops, doing:
+//  - choose a process to run
+//  - swtch to start running that process
+//  - eventually that process transfers control
+//      via swtch back to the scheduler.
+void
+scheduler(void)
+{
+//JTM - Run the default scheduler code if the macro is set to DEFAULT
+
+#ifdef DEFAULT
+ defaultScheduler(); 
+
+//JTM - Run the FIFO scheduler if the macro is set to FIFO
+#else
+#ifdef FIFO
+
+  //Begin FIFO scheduler definition here (whether it be your own function or whatever)
+
+
+//JTM - Run the priority scheduler if the macro is set to PRIORITY
+#else
+#ifdef PRIORITY
+
+  priorityScheduler();
+
+//JTM - Panic otherwise
+#else
+
+  panic("Scheduler uninitialized. Macro name not valid.\n");
+
+#endif
+#endif
+#endif
+  
 }
 
 // Enter scheduler.  Must hold only ptable.lock
@@ -385,10 +546,14 @@ sched(void)
 void
 yield(void)
 {
+  //JTM - We only do this whenever we are using the default scheduler to enforce the default time quantum
+#ifdef DEFAULT
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
+#endif
+
 }
 
 // A fork child's very first scheduling by scheduler()

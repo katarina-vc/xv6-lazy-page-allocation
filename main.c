@@ -7,9 +7,13 @@
 #include "x86.h"
 
 static void startothers(void);
-static void mpmain(void)  __attribute__((noreturn));
+static void mpmain()  __attribute__((noreturn));
 extern pde_t *kpgdir;
 extern char end[]; // first address after kernel loaded from ELF file
+
+// JTM - Add global variables to capture arguments
+int argumentCount;
+char** argumentArray;
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
@@ -49,7 +53,7 @@ mpenter(void)
 
 // Common CPU setup code.
 static void
-mpmain(void)
+mpmain()
 {
   cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
   idtinit();       // load idt register
