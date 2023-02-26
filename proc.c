@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "syscall.h"
 
 struct {
   struct spinlock lock;
@@ -88,7 +89,10 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  p->pStartTime = 0; // Initialize the process's start uptime to 0
+  p->pEndTime = 0;   // Initialize the process's end uptime to 0
+  p->pUptime = 0;    // Initialize the process's total uptime to 0
+		    
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -342,6 +346,16 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      
+      // Collect uptime() for the current running process
+      if(p->pEndTime != 0){
+	// Check to see if the process already ran for awhile earlier
+	// and store that uptime in its total uptime
+	p->pUptime += p->pEndTime - p->pStartTime;
+	// Reset pStartTime and pEndTime
+	p->pStartTime = SYS_uptime;
+	p->pEndTime = 0;
+      }
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -387,6 +401,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+  myproc()->pEndTime = SYS_uptime;
   sched();
   release(&ptable.lock);
 }
@@ -438,6 +453,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
+  p->pEndTime = SYS_uptime;
 
   sched();
 

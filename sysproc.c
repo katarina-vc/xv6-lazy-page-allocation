@@ -89,3 +89,39 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_time_scheduled(void)
+{
+	struct proc *p;
+	sti();
+	acquire(&ptable.lock);
+	cprintf("PID\tSTATE\n");
+	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		if(p->state != UNUSED){
+			cprintf("%d\t", p->pid);
+			switch(p->state) {
+				case UNUSED:
+					cprintf("UNUSED\n");
+					break;
+				case EMBRYO:
+					cprintf("EMBRYO\n");
+					break;
+				case SLEEPING:
+					cprintf("SLEEPING\n");
+					break;
+				case RUNNING:
+					cprintf("RUNNING\n");
+				case RUNNABLE:
+					cprintf("RUNNABLE\n");
+					break;
+				case ZOMBIE:
+					cprintf("ZOMBIE\n");
+					break;
+			}
+		}
+	}
+	release(&ptable.lock);
+	return myproc()->pUptime;
+}
+

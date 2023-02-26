@@ -49,6 +49,9 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  uint pStartTime;	       // Start uptime for the process
+  uint pEndTime;	       // End uptime for the process
+  uint pUptime;		       // The total uptime for the process
 };
 
 // Process memory is laid out contiguously, low addresses first:
