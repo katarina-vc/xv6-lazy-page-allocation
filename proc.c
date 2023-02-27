@@ -29,6 +29,9 @@ const int DEFAULT_PRIORITY = NUM_PRIORITY_LEVELS / 2;
 void defaultScheduler(void)  __attribute__((noreturn));
 void priorityScheduler(void)  __attribute__((noreturn));
 
+// AI - Define this function with the attribute noreturn 
+void fifoScheduler(void) __attribute__((noreturn));
+
 void
 pinit(void)
 {
@@ -449,6 +452,52 @@ defaultScheduler(void){
     // Enable interrupts on this processor.
     sti();
 
+    // Loop over process table looking for first process to run.
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == RUNNABLE)
+        break;
+
+    }
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+    
+
+    release(&ptable.lock);
+
+  }
+
+}
+
+// AI - End default scheduler implementation 
+
+
+// AI - Start of FIFO Scheduler implementation 
+
+
+void
+fifoScheduler(void){
+
+  cprintf("Using the DEFAULT scheduler...\n");
+
+  struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+
+  for(;;){
+    sti();
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -476,6 +525,40 @@ defaultScheduler(void){
 
 }
 
+
+
+
+int
+fifo_position(int pid)
+{
+
+	struct proc *p;
+	acquire(&ptable.lock);
+
+	int counter = 0;
+	int flag = 0;
+
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(p->pid == pid){
+			cprintf("Name: %s, PID: %d, Position: %d\n", p->name,p->pid, counter);
+			flag = 1;
+			break;
+		}
+	counter++;
+	}
+
+	if(!flag)
+		cprintf("PID not found\n");
+
+	release(&ptable.lock);
+	return 1;
+}
+
+// AI - End of FIFO Scheduler implementation 
+
+
+
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -497,7 +580,7 @@ scheduler(void)
 #ifdef FIFO
 
   //Begin FIFO scheduler definition here (whether it be your own function or whatever)
-
+  fifoScheduler();
 
 //JTM - Run the priority scheduler if the macro is set to PRIORITY
 #else

@@ -125,6 +125,10 @@ void            yield(void);
 void		set_sched_priority(int);
 int		get_sched_priority(int);
 
+// AI - Allow this system calls to be defined in proc.c
+int 		fifo_position(int pid);
+
+
 // swtch.S
 void            swtch(struct context**, struct context*);
 

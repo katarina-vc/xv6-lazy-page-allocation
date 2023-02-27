@@ -20,6 +20,20 @@ sys_set_sched_priority(void){
   return 0;
 }
 
+
+// AI - Implement system calls for FIFO scheduler 
+int
+sys_fifo_position(void)
+{
+	int pid;
+	if(argint(0, &pid) < 0)
+		return -1;
+
+	return fifo_position(pid);
+}
+
+
+
 int
 sys_get_sched_priority(void){
   int pid;

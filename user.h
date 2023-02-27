@@ -28,6 +28,10 @@ int uptime(void);
 int set_sched_priority(int);
 int get_sched_priority(int);
 
+//AI - Add in more system calls 
+int fifo_position(int pid);
+
+
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
