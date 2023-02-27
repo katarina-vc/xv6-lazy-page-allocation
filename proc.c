@@ -33,6 +33,17 @@ cpuid() {
   return mycpu()-cpus;
 }
 
+// KVC: Added Uptime function here so that I can access it when we print out the pTable
+int
+processUptime(void)
+{
+	uint xticks;
+	acquire(&tickslock);
+	xticks = ticks;
+	release(&tickslock);
+	return xticks;
+}
+
 // Must be called with interrupts disabled to avoid the caller being
 // rescheduled between reading lapicid and running through the loop.
 struct cpu*
@@ -346,16 +357,18 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      
+
+      // KVC: First we check if the process has already been run for a time slice or period
       // Collect uptime() for the current running process
       if(p->pEndTime != 0){
 	// Check to see if the process already ran for awhile earlier
 	// and store that uptime in its total uptime
 	p->pUptime += p->pEndTime - p->pStartTime;
-	// Reset pStartTime and pEndTime
-	p->pStartTime = SYS_uptime;
+	// Reset its end time
 	p->pEndTime = 0;
-      }
+      } 
+
+      p->pStartTime = processUptime();
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -401,7 +414,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
-  myproc()->pEndTime = SYS_uptime;
+  myproc()->pEndTime = processUptime();
   sched();
   release(&ptable.lock);
 }
@@ -453,7 +466,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-  p->pEndTime = SYS_uptime;
+  p->pEndTime = processUptime();
 
   sched();
 
@@ -547,4 +560,36 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+void
+printProcesses(void)
+{
+	struct proc *p;
+	sti();
+	acquire(&ptable.lock);
+	cprintf("PID\tSTATE\tPROCESS UPTIME\n");
+
+
+	cprintf("uptime: %d\n internal uptime: %d\n", SYS_uptime, processUptime());
+
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+			            switch(p->state) {
+					 case UNUSED:
+                                              cprintf("%d\tUNUSED\t%d\n", p->pid, p->pUptime);
+		                              break;
+		                         case EMBRYO:
+					      cprintf("%d\tEMBRYO\t%d\n", p->pid, p->pUptime);
+	                                      break;
+				         case SLEEPING:
+					      cprintf("%d\tSLEEPING\t%d\n", p->pid, p->pUptime);
+ 					      break;																									    case RUNNING:
+					      cprintf("%d\tRUNNING\t%d\n", p->pid, p->pUptime);																				         break;
+					 case RUNNABLE:																					                                        cprintf("%d\tRUNNABLE\t%d\n", p->pid, p->pUptime);
+					     break;
+					  case ZOMBIE:
+					     cprintf("%d\tZOMBIE\t%d\n", p->pid, p->pUptime);
+					     break;																									}
+	}
+	release(&ptable.lock);
 }
