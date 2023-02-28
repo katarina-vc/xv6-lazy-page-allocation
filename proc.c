@@ -487,7 +487,7 @@ defaultScheduler(void){
 void
 fifoScheduler(void){
 
-  cprintf("Using the DEFAULT scheduler...\n");
+  cprintf("Using the FIFO scheduler...\n");
 
   struct proc *p;
   struct cpu *c = mycpu();
@@ -499,7 +499,7 @@ fifoScheduler(void){
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
-        continue;
+        break;
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -536,19 +536,20 @@ fifo_position(int pid)
 	int flag = 0;
 
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(p->pid == pid){
+		if(p->pid == pid && p->state == RUNNABLE){
 			cprintf("Name: %s, PID: %d, Position: %d\n", p->name,p->pid, counter);
 			flag = 1;
 			break;
 		}
-	counter++;
+		if(p->state == RUNNABLE)
+			counter++;
 	}
 
 	if(!flag)
-		cprintf("PID not found\n");
+		cprintf("PID not found or not in Queue\n");
 
 	release(&ptable.lock);
-	return 1;
+	return counter;
 }
 
 // AI - End of FIFO Scheduler implementation 
