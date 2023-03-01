@@ -357,17 +357,15 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-
+     
+      if(p->pStartTime != 0){
+	p->pUptime += p->pEndTime - p->pStartTime;
+      } 
       // KVC: First we check if the process has already been run for a time slice or period
       // Collect uptime() for the current running process
-      if(p->pEndTime != 0){
 	// Check to see if the process already ran for awhile earlier
 	// and store that uptime in its total uptime
-	p->pUptime += p->pEndTime - p->pStartTime;
-	// Reset its end time
-	p->pEndTime = 0;
-      } 
-
+ 
       p->pStartTime = processUptime();
 
       swtch(&(c->scheduler), p->context);
@@ -404,6 +402,7 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = mycpu()->intena;
+  p->pEndTime = processUptime();
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
 }
@@ -414,7 +413,6 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
-  myproc()->pEndTime = processUptime();
   sched();
   release(&ptable.lock);
 }
@@ -466,7 +464,6 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-  p->pEndTime = processUptime();
 
   sched();
 
