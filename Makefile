@@ -188,6 +188,7 @@ UPROGS=\
 	_sleep\
 	_uniq\
 	_fifo_position\
+	_priorityTest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
