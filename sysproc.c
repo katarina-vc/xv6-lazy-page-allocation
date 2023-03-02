@@ -89,3 +89,15 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_time_scheduled(void)
+{
+  int processId;
+  // Check for a valid arg passed in, if not just return -1 because something went wrong
+  if (argint(0, &processId) < 0) {
+    return -1;
+  }
+  // call proc.c func printProcessTime to actually do the thing
+	return printProcessTime(processId);
+}

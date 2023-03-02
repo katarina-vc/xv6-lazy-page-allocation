@@ -45,5 +45,7 @@ main(int argc, char *argv[])
 
   wait();
 
+  // KC: Added time_sched checks for Project 2
+  printf(1, "\nRunning user program: stressfs. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
   exit();
 }

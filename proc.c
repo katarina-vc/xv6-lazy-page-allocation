@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "syscall.h"
 
 struct {
   struct spinlock lock;
@@ -30,6 +31,17 @@ pinit(void)
 int
 cpuid() {
   return mycpu()-cpus;
+}
+
+// KVC: Added Uptime function here so that I can access it when we print out the pTable
+int
+processUptime(void)
+{
+	uint xticks;
+	acquire(&tickslock);
+	xticks = ticks;
+	release(&tickslock);
+	return xticks;
 }
 
 // Must be called with interrupts disabled to avoid the caller being
@@ -88,7 +100,10 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-
+  p->pStartTime = 0; // Initialize the process's start uptime to 0
+  p->pEndTime = 0;   // Initialize the process's end uptime to 0
+  p->pUptime = 0;    // Initialize the process's total uptime to 0
+		    
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -342,6 +357,15 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+     
+     // KC: Checking the running uptime for a process
+     // check if the process has already run for a period of time so we add to get the total run time
+      if(p->pEndTime != 0){
+	      p->pUptime += p->pEndTime - p->pStartTime;
+      } 
+      // reset the process start time and end time
+      p->pStartTime = processUptime();
+      p->pEndTime = 0;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -377,6 +401,7 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = mycpu()->intena;
+  p->pEndTime = processUptime();
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
 }
@@ -532,3 +557,52 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+printProcessTime(int processId)
+{
+  // Boolean flag for whether or not we found our process in the ptable
+  int foundProcessFlag = 0; 
+  // Process PCB
+	struct proc *p;
+  // Store final variable to return after releasing ptable lock
+  int ptime = -1;
+  // enable interrupts
+	sti();
+
+  // Lock the ptable to avoid changes occurring while looking at it
+	acquire(&ptable.lock);
+
+  // Loop through ptable to find running processes
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      // Search for a matching process Id
+      if(p->pid == processId) {
+        // Set foundProcessFlag to true so that we know our process id exists
+        foundProcessFlag = 1;
+
+        // Check process id state to determine what to do next
+        switch(p->state) {
+			                  case RUNNING:
+                                ptime = p->pUptime;
+                                break;
+                        case ZOMBIE:
+                        case RUNNABLE:
+                        case EMBRYO:
+                        case UNUSED:
+                        case SLEEPING:
+                                ptime = 0; // returns 0 if process exists but is not currently running
+                                break;
+      } // end switch()
+	} // end if(p->pid == processId)
+
+    // If the pid was not found in the ptable, return -1
+    if(foundProcessFlag == 0){
+      ptime = -1;
+    }
+  }// end for loop on ptable
+
+    // Release our firm grip on the ptable
+	release(&ptable.lock);
+
+  return ptime;
+} // end printProcessTime()
