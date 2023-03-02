@@ -397,6 +397,15 @@ priorityScheduler(void){
       		switchuvm(highestPriorityProcess);
       		highestPriorityProcess->state = RUNNING;
 
+            // KC: Checking the running uptime for a process
+            // check if the process has already run for a period of time so we add to get the total run time
+            if(highestPriorityProcess->pEndTime != 0){
+              highestPriorityProcess->pUptime += highestPriorityProcess->pEndTime - highestPriorityProcess->pStartTime;
+            } 
+            // reset the process start time and end time
+            highestPriorityProcess->pStartTime = processUptime();
+            highestPriorityProcess->pEndTime = 0;
+
      		swtch(&(c->scheduler), highestPriorityProcess->context);
      		switchkvm();
 
@@ -552,7 +561,14 @@ fifoScheduler(void){
             c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
-
+            // KC: Checking the running uptime for a process
+            // check if the process has already run for a period of time so we add to get the total run time
+            if(p->pEndTime != 0){
+              p->pUptime += p->pEndTime - p->pStartTime;
+            } 
+            // reset the process start time and end time
+            p->pStartTime = processUptime();
+            p->pEndTime = 0;
             swtch(&(c->scheduler), p->context);
             switchkvm();
 
@@ -598,13 +614,16 @@ fifo_position(int pid)
 			counter++;
 	}
 
-	if(!flag)
+	if(!flag) {
 		cprintf("PID not found or not in Queue\n");
+    release(&ptable.lock);
+
+    return -1;
+  }
 
 	release(&ptable.lock);
 	return counter;
 }
-
 // AI - End of FIFO Scheduler implementation 
 
 
