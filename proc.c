@@ -501,32 +501,54 @@ fifoScheduler(void){
 
   for(;;){
     sti();
-    // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    // Pointer for the first task
+    struct proc* firstProcess = 0;
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        break;
+        if(p->state != RUNNABLE)
+                continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+        // ignore the first command about init
+        if (p->pid > 1)
+                firstProcess = p;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+        // make sure that the process is runnable and then set p to the first process. This way p will always be the first task no matter what
+        if(firstProcess != 0 && firstProcess->state == RUNNABLE)
+                p = firstProcess;
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
+        if(p != 0)
+          {
 
-    release(&ptable.lock);
+            // Switch to chosen process.  It is the process's job
+            // to release ptable.lock and then reacquire it
+            // before jumping back to us.
+            c->proc = p;
+            switchuvm(p);
+            p->state = RUNNING;
+
+            swtch(&(c->scheduler), p->context);
+            switchkvm();
+
+            // Process is done running for now.
+            // It should have changed its p->state before coming back.
+            c->proc = 0;
+          }
+        }
+
+        release(&ptable.lock);
+
+
 
   }
 
 }
+
+
+
+
+
 
 
 
