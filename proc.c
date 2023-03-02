@@ -26,6 +26,9 @@ static void wakeup1(void *chan);
 const int NUM_PRIORITY_LEVELS = 10;
 const int DEFAULT_PRIORITY = NUM_PRIORITY_LEVELS / 2;
 
+//JTM - Also define the current highest priority level
+int currentHighestPriority = NUM_PRIORITY_LEVELS;
+
 //JTM - Define these functions with the attribute noreturn
 void defaultScheduler(void)  __attribute__((noreturn));
 void priorityScheduler(void)  __attribute__((noreturn));
@@ -181,10 +184,9 @@ userinit(void)
   // because the assignment might not be atomic.
   acquire(&ptable.lock);
 
-  p->state = RUNNABLE;
+  p->state = RUNNABLE; 
 
-  //JTM - Also establish first process's priority
-  p->priority = 1;
+  p->priority = DEFAULT_PRIORITY;
 
   release(&ptable.lock);
 }
@@ -251,6 +253,8 @@ fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+
+  np->priority = DEFAULT_PRIORITY;
 
   release(&ptable.lock);
 
@@ -330,6 +334,7 @@ wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+	p->priority = 0;
         p->state = UNUSED;
         release(&ptable.lock);
         return pid;
@@ -376,7 +381,7 @@ priorityScheduler(void){
 		// Loop over process table looking for the highest priority process
     		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			// If process is runnable and its priority is lower than the highest priority...
-      			if(p->state == RUNNABLE && p->priority < highestPriority){
+      			if(p->state == RUNNABLE && p->priority < highestPriority && p->priority > 0){
 				// Grab the first process in that priority class (this results in FIFO scheduling for processes with the same priority)
 				highestPriorityProcess = p;
 
@@ -390,7 +395,10 @@ priorityScheduler(void){
 		if (highestPriorityProcess->state != RUNNABLE){
 			release(&ptable.lock);
 			continue;
-		}
+		}	
+
+		// Set the current highest priority
+		currentHighestPriority = highestPriority;
 
 		// Switch to highest priority process
       		c->proc = highestPriorityProcess;
@@ -586,14 +594,6 @@ fifoScheduler(void){
 
 }
 
-
-
-
-
-
-
-
-
 int
 fifo_position(int pid)
 {
@@ -627,8 +627,6 @@ fifo_position(int pid)
 // AI - End of FIFO Scheduler implementation 
 
 
-
-
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -643,6 +641,7 @@ scheduler(void)
 //JTM - Run the default scheduler code if the macro is set to DEFAULT
 
 #ifdef DEFAULT
+
   defaultScheduler(); 
 
 //JTM - Run the FIFO scheduler if the macro is set to FIFO
@@ -705,8 +704,26 @@ yield(void)
   myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
-#endif
+#else
+#ifdef PRIORITY
+	//Check the process table to see if a higher priority process is available
+  	struct proc *p;
+  	acquire(&ptable.lock);
 
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		//If process has higher than the current highest priority...
+ 		if(p->priority < currentHighestPriority && p->priority > 0){
+			//Interrupt!
+			procdump();	
+			myproc()->state = RUNNABLE;
+			sched();
+			break;
+		}
+	}
+
+  	release(&ptable.lock);
+#endif
+#endif
 }
 
 // A fork child's very first scheduling by scheduler()
@@ -841,7 +858,7 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s", p->pid, state, p->name);
+    cprintf("%d %s %s %d", p->pid, state, p->name, p->priority);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context->ebp+2, pc);
       for(i=0; i<10 && pc[i] != 0; i++)

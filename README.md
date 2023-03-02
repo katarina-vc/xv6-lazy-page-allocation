@@ -1,6 +1,6 @@
-# COP6611.001S23 OperatingSystems - Project 1
+# COP6611.001S23 - Operating Systems - Project 2
 
-## Group Members
+## Group Members (Same Team from Project 1)
 * Katarina Capalbo 
 * John Maurer
 * Azim Ibragimov
@@ -11,21 +11,16 @@
 
 ## Implementation Notes
 
-### `ls` Command Implementation Notes
-The ls command was implemented as advised on the Canvas instructions page. The ls command hides hidden files by checking if there is "." at the start of the file name. Additionally, it checks if a file type of a current entry is a folder, and if there is so, it appends "/" to the end of the file. Additionally, the flag `-a` makes it possible to display hidden files. 
+### Makefile Changes
+The Makefile has been modified to support a new flag `SCHEDULER`. When the program is compiled with `make qemu-nox`, the `SCHEDULER` flag is set to `DEFAULT` to enter into the scheduler that came with xv6. You can switch to the FIFO and priority scheduler by compiling with `make qemu-nox SCHEDULER=FIFO` and `make qemu-nox SCHEDULER=PRIORITY` respectively.
 
-### `sleep` Command Implementation Notes
-This instruction followed the guidelines of Dr. Kim. Particluraly, it accepts an integer number that indicates the number of CPU Clock Ticks the sleep command is going to be working for. Then it passes the argument to the sleep system class. To make it easier for users to use this function, we added it to the makefile so that users can call it from the terminal. 
+### `time_scheduled()` System Call
 
 
-### `find` Command Implementation Notes
-The find command has been implemented, as per Professor Gene Kim's instructions, the user MUST specify the "-name" flag at the very least in order to use the command. Additionally, the user cannot use regex to find files.
+### Basic Scheduler - FIFO
 
-To implement the find command, I created a find command struct that holds all of the needed to data in order to search for the file name the user wants with the correct flags specified. Throughout the code, we use that findCommand struct while traversing through directories to search for a match. Additionally, there is a recursive search that is performed in order to traverse through each nested directory that may be inside the starting point. 
 
-Error checking has been implemented throughout to ensure the user has formatted the find command correctly.
+### Interesting Scheduler - Priority with FIFO Queues
+The priority scheduler looks through the process table in search of the highest priority process to put on the CPU. A lower priority number indicates more importance (such that the highest priority is 1 and the lowest priority is established by the global variable `NUM_PRIORITY_LEVELS`). The search scans the process table from the top down, looking for the first highest priority process it sees (this produces a FIFO queue for each priority level since it will skip over processes of the same priority that entered the process table later). This process runs until completion, to which the scheduler performs the search again.
 
-### `uniq` Command Implementation Notes
-The project specified that `uniq` was intended to find duplicated lines in a file that are adjacent to one another. Additionally, the program was also to accept 3 different flags (in any combination) and also support piping from other commands, such as `cat`. The program reads in the arguments of the command call, and if the flags match, a `flags` array is updated before being sent into the `uniq` function.
-
-Using the structure of `cat` as a base, I decided to read in the file character by character, searching for newline characters to determine when to populate my string arrays. Comparisons are performed to determine when matches have been made, and integer flags are set and reset - depending on the situation - to determine when to print and what to print.
+The system calls `set_sched_priority(int priority)` and `get_sched_priority(pid)` have also been implemented. The user program `priorityTest` can be run to see them in action.
