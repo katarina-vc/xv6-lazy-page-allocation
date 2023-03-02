@@ -360,7 +360,7 @@ scheduler(void)
      
      // KC: Checking the running uptime for a process
      // check if the process has already run for a period of time so we add to get the total run time
-      if(p->pStartTime != 0){
+      if(p->pEndTime != 0){
 	      p->pUptime += p->pEndTime - p->pStartTime;
       } 
       // reset the process start time and end time
