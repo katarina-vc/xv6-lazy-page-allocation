@@ -12,6 +12,7 @@
 void
 uniq(int fileDescriptor, int flags[])
 {
+
 	//Variable definitions
 	int hasChar;
 	int isFirstIteration = 1;
@@ -96,6 +97,8 @@ uniq(int fileDescriptor, int flags[])
 		printf(1, "uniq: could not read file\n");
 		    // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+			    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 	
@@ -116,6 +119,8 @@ uniq(int fileDescriptor, int flags[])
 int
 main(int argc, char *argv[])
 {
+		    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq starting uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	//Variable definitions
 	int fileDescriptor, argParseIndex;
 	int fileNameLocation = argc - 1;
@@ -130,6 +135,8 @@ main(int argc, char *argv[])
 
 				    // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+			    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 
@@ -141,6 +148,8 @@ main(int argc, char *argv[])
 
 				    // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+			    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 	
@@ -150,6 +159,8 @@ main(int argc, char *argv[])
 
 				    // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+		    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 
@@ -176,5 +187,7 @@ main(int argc, char *argv[])
 
 			    // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+		    // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	exit();
 }

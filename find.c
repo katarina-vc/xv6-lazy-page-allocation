@@ -52,6 +52,8 @@ void displayFormattingErrorMsg() {
 
     // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+      // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	exit();
 }
 
@@ -306,6 +308,8 @@ void findOneFlag(struct findCommandStruct findCmd, struct stat statObj, char *fo
 
 // start main()
 int main(int argc, char *argv[]) {
+        // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find starting uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
     // Check for a valid number of arguments.
 	if(argc < 4 || argc == 5 || argc == 7 || argc > 8) {
 		displayFormattingErrorMsg();
@@ -494,6 +498,8 @@ int main(int argc, char *argv[]) {
 
     // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+      // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
             exit();
     }
 
@@ -502,6 +508,8 @@ int main(int argc, char *argv[]) {
             printf(1, "find failed: Cannot open folder: %s, or folder does not exist.\n", argv[1]);
     // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+      // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
             exit();
     }
 
@@ -511,6 +519,8 @@ int main(int argc, char *argv[]) {
             close(startingFileDescriptor);
     // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+      // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
             exit();
     }
 
@@ -526,5 +536,7 @@ int main(int argc, char *argv[]) {
     close(startingFileDescriptor);
     // KC: Added time_sched checks for Project 2
     printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
+      // KC printing out uptime for performance analysis proj 2.
+  printf(1, "\n find ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	exit();
 } // end main()
