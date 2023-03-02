@@ -24,3 +24,4 @@
 #define SYS_set_sched_priority 23
 #define SYS_get_sched_priority 24
 #define SYS_fifo_position 25
+#define SYS_printProcessTable 26

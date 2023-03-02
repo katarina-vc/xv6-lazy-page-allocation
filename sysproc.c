@@ -139,3 +139,16 @@ sys_time_scheduled(void)
   // call proc.c func printProcessTime to actually do the thing
 	return printProcessTime(processId);
 }
+
+void 
+sys_printProcessTable(void)
+{
+  int processId;
+  // Check for a valid arg passed in, if not just return -1 because something went wrong
+  if (argint(0, &processId) < 0) {
+    exit();
+  }
+  // call proc.c func printProcessTable to actually do the thing
+	printProcessTable(processId);
+}
+
