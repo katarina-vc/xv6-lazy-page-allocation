@@ -358,15 +358,14 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
      
+     // KC: Checking the running uptime for a process
+     // check if the process has already run for a period of time so we add to get the total run time
       if(p->pStartTime != 0){
-	p->pUptime += p->pEndTime - p->pStartTime;
+	      p->pUptime += p->pEndTime - p->pStartTime;
       } 
-      // KVC: First we check if the process has already been run for a time slice or period
-      // Collect uptime() for the current running process
-	// Check to see if the process already ran for awhile earlier
-	// and store that uptime in its total uptime
- 
+      // reset the process start time and end time
       p->pStartTime = processUptime();
+      p->pEndTime = 0;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -559,34 +558,51 @@ procdump(void)
   }
 }
 
-void
-printProcesses(void)
+int
+printProcessTime(int processId)
 {
+  // Boolean flag for whether or not we found our process in the ptable
+  int foundProcessFlag = 0; 
+  // Process PCB
 	struct proc *p;
+  // Store final variable to return after releasing ptable lock
+  int ptime = -1;
+  // enable interrupts
 	sti();
+
+  // Lock the ptable to avoid changes occurring while looking at it
 	acquire(&ptable.lock);
-	cprintf("PID\tSTATE\tPROCESS UPTIME\n");
 
-
-	cprintf("uptime: %d\n internal uptime: %d\n", SYS_uptime, processUptime());
-
+  // Loop through ptable to find running processes
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-			            switch(p->state) {
-					 case UNUSED:
-                                              cprintf("%d\tUNUSED\t%d\n", p->pid, p->pUptime);
-		                              break;
-		                         case EMBRYO:
-					      cprintf("%d\tEMBRYO\t%d\n", p->pid, p->pUptime);
-	                                      break;
-				         case SLEEPING:
-					      cprintf("%d\tSLEEPING\t%d\n", p->pid, p->pUptime);
- 					      break;																									    case RUNNING:
-					      cprintf("%d\tRUNNING\t%d\n", p->pid, p->pUptime);																				         break;
-					 case RUNNABLE:																					                                        cprintf("%d\tRUNNABLE\t%d\n", p->pid, p->pUptime);
-					     break;
-					  case ZOMBIE:
-					     cprintf("%d\tZOMBIE\t%d\n", p->pid, p->pUptime);
-					     break;																									}
-	}
+      // Search for a matching process Id
+      if(p->pid == processId) {
+        // Set foundProcessFlag to true so that we know our process id exists
+        foundProcessFlag = 1;
+
+        // Check process id state to determine what to do next
+        switch(p->state) {
+			                  case RUNNING:
+                                ptime = p->pUptime;
+                                break;
+                        case ZOMBIE:
+                        case RUNNABLE:
+                        case EMBRYO:
+                        case UNUSED:
+                        case SLEEPING:
+                                ptime = 0; // returns 0 if process exists but is not currently running
+                                break;
+      } // end switch()
+	} // end if(p->pid == processId)
+
+    // If the pid was not found in the ptable, return -1
+    if(foundProcessFlag == 0){
+      ptime = -1;
+    }
+  }// end for loop on ptable
+
+    // Release our firm grip on the ptable
 	release(&ptable.lock);
-}
+
+  return ptime;
+} // end printProcessTime()

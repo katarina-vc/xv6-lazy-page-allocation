@@ -12,11 +12,17 @@ cat(int fd)
   while((n = read(fd, buf, sizeof(buf))) > 0) {
     if (write(1, buf, n) != n) {
       printf(1, "cat: write error\n");
+
+      		    // KC: Added time_sched checks for Project 2
+    printf(1, "\nRunning user program: cat. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
       exit();
     }
   }
   if(n < 0){
     printf(1, "cat: read error\n");
+
+          		    // KC: Added time_sched checks for Project 2
+    printf(1, "\nRunning user program: cat. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
     exit();
   }
 }
@@ -28,16 +34,25 @@ main(int argc, char *argv[])
 
   if(argc <= 1){
     cat(0);
+
+          		    // KC: Added time_sched checks for Project 2
+    printf(1, "\nRunning user program: cat. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
     exit();
   }
 
   for(i = 1; i < argc; i++){
     if((fd = open(argv[i], 0)) < 0){
       printf(1, "cat: cannot open %s\n", argv[i]);
+
+            		    // KC: Added time_sched checks for Project 2
+    printf(1, "\nRunning user program: cat. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
       exit();
     }
     cat(fd);
     close(fd);
   }
+
+        		    // KC: Added time_sched checks for Project 2
+    printf(1, "\nRunning user program: cat. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
   exit();
 }
