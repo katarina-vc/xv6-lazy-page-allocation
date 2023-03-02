@@ -104,6 +104,7 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_time_scheduled(void);
+extern int sys_printProcessTable(void);
 
 //JTM - Add in system calls
 extern int sys_set_sched_priority(void);
@@ -139,6 +140,7 @@ static int (*syscalls[])(void) = {
 [SYS_set_sched_priority]   sys_set_sched_priority,
 [SYS_get_sched_priority]   sys_get_sched_priority,
 [SYS_fifo_position]	sys_fifo_position,
+[SYS_printProcessTable] sys_printProcessTable,
 };
 
 void

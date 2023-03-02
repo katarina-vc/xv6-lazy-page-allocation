@@ -191,6 +191,8 @@ UPROGS=\
 	_fifo_position\
 	_priorityTest\
 	_time_scheduled_test\
+	_any_pid\
+	_non_existant_pid\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -260,7 +262,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	first.c\ find.c\ ptime.c\ time_scheduled_test.c\
+	first.c\ find.c\ ptime.c\ time_scheduled_test.c\ any_pid.c\ non_existant_pid.c\
         printf.c umalloc.\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\

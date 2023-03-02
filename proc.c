@@ -899,3 +899,53 @@ printProcessTime(int processId)
 
   return ptime;
 } // end printProcessTime()
+
+void
+printProcessTable(int processId)
+{
+    // Boolean flag for whether or not we found our process in the ptable
+  int foundProcessFlag = 0; 
+  // Process PCB
+	struct proc *p;
+  // enable interrupts
+	sti();
+  // Lock the ptable to avoid changes occurring while looking at it
+	acquire(&ptable.lock);
+  cprintf("\nPID\tSTATE\n");
+  cprintf("--------------------------------------\n");
+
+  // Loop through ptable 
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if(p->pid == processId) {
+              foundProcessFlag = 1;
+        switch(p->state) {
+			                  case RUNNING:
+                                cprintf("%d\tRUNNING\n", p->pid);
+                                break;
+                        case ZOMBIE:
+                                cprintf("%d\tZOMBIE\n", p->pid);
+                                break;
+                        case RUNNABLE:
+                                cprintf("%d\tRUNNABLE\n", p->pid);
+                                break;
+                        case EMBRYO:
+                                cprintf("%d\tEMBRYO\n", p->pid);
+                                break;
+                        case UNUSED:
+                                cprintf("%d\tUNUSED\n", p->pid);
+                                break;
+                        case SLEEPING:
+                                cprintf("%d\tSLEEPING\n", p->pid);
+                                break;
+      } // end switch()
+    }
+  }
+
+      // If the pid was not found in the ptable, process does not exist
+    if(foundProcessFlag == 0){
+      cprintf("\nProcess id, %d, does not exist or no longer exists.\n", processId);
+    }
+
+  // Release our firm grip on the ptable
+	release(&ptable.lock);
+} // end printProcessTable()

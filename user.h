@@ -24,6 +24,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int time_scheduled(int);
+void printProcessTable(int);
 
 //JTM - Add in more system calls
 int set_sched_priority(int);
