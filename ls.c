@@ -100,6 +100,8 @@ main(int argc, char *argv[])
 
   if(argc < 2){
     ls(".", 0);
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: ls. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
     exit();
   }
 
@@ -111,9 +113,9 @@ main(int argc, char *argv[])
   }
  
   ls(".", flag);
-  
- 
 
+  // KC: Added time_sched checks for Project 2
+  printf(1, "Running user program: ls. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
   exit();
 }
 

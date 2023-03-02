@@ -20,6 +20,7 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_time_scheduled 22
 #define SYS_set_sched_priority 22
 #define SYS_get_sched_priority 23
 #define SYS_fifo_position 24

@@ -23,6 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int time_scheduled(int);
 
 //JTM - Add in more system calls
 int set_sched_priority(int);
@@ -30,7 +31,6 @@ int get_sched_priority(int);
 
 //AI - Add in more system calls 
 int fifo_position(int pid);
-
 
 // ulib.c
 int stat(const char*, struct stat*);

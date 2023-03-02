@@ -120,6 +120,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int		printProcessTime(int);
 
 //JTM - Allow these system calls to be defined in proc.c
 void		set_sched_priority(int);

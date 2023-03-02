@@ -103,6 +103,7 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_time_scheduled(void);
 
 //JTM - Add in system calls
 extern int sys_set_sched_priority(void);
@@ -134,6 +135,7 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_time_scheduled] sys_time_scheduled,
 [SYS_set_sched_priority]   sys_set_sched_priority,
 [SYS_get_sched_priority]   sys_get_sched_priority,
 [SYS_fifo_position]	sys_fifo_position,

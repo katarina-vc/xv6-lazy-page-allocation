@@ -50,6 +50,8 @@ void displayFormattingErrorMsg() {
 	printf(1, "\n\t\tfind <folder> -name <name> -size -<number of bytes>\n");
     printf(1, "\n\t\tfind <folder> -name <name> -size -<number of bytes> -type <f or d>\n");
 
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
 	exit();
 }
 
@@ -490,13 +492,16 @@ int main(int argc, char *argv[]) {
     if(findCmd.fileName == NULL){
             printf(1, "find failed: Please enter a valid file or folder name to search for\n");
 
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
             exit();
     }
 
     // Open the starting point folder path.
     if((startingFileDescriptor = open(argv[1], 0)) < 0) {
             printf(1, "find failed: Cannot open folder: %s, or folder does not exist.\n", argv[1]);
-
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
             exit();
     }
 
@@ -504,7 +509,8 @@ int main(int argc, char *argv[]) {
     if(fstat(startingFileDescriptor, &statObj) < 0) {
             printf(1, "find failed: Cannot get status information about: %s\n", argv[1]);
             close(startingFileDescriptor);
-
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
             exit();
     }
 
@@ -518,6 +524,7 @@ int main(int argc, char *argv[]) {
     }
 
     close(startingFileDescriptor);
-
+    // KC: Added time_sched checks for Project 2
+    printf(1, "Running user program: find. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
 	exit();
 } // end main()
