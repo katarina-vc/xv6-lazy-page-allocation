@@ -552,7 +552,7 @@ fifoScheduler(void){
         if(p->state != RUNNABLE)
                 continue;
 
-        // ignore the first command about init
+        // ignore the first command about shell init
         if (p->pid > 1)
                 firstProcess = p;
 
@@ -602,27 +602,29 @@ fifo_position(int pid)
 	acquire(&ptable.lock);
 
 	int counter = 0;
-	int flag = 0;
+	//int flag = 0;
 
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(p->pid == pid && p->state == RUNNABLE){
-			cprintf("Name: %s, PID: %d, Position: %d\n", p->name,p->pid, counter);
-			flag = 1;
-			break;
+		if(p->pid == pid && (p->state == RUNNABLE || p->state == RUNNING)){
+			//cprintf("Name: %s, PID: %d, Position: %d\n", p->name,p->pid, counter);
+			//flag = 1;
+			//break;
+			release(&ptable.lock);
+			return counter;
 		}
-		if(p->state == RUNNABLE)
+		if(p->state == RUNNABLE || p->state == RUNNING)
 			counter++;
 	}
 
-	if(!flag) {
-		cprintf("PID not found or not in Queue\n");
+	//if(!flag) {
+	//	cprintf("PID not found or not in Queue\n");
     release(&ptable.lock);
 
     return -1;
-  }
+  //}
 
-	release(&ptable.lock);
-	return counter;
+	//release(&ptable.lock);
+	//return counter;
 }
 // AI - End of FIFO Scheduler implementation 
 
@@ -713,7 +715,8 @@ yield(void)
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		//If process has higher than the current highest priority...
  		if(p->priority < currentHighestPriority && p->priority > 0){
-			//Interrupt!	
+			//Interrupt!
+			procdump();	
 			myproc()->state = RUNNABLE;
 			sched();
 			break;
