@@ -713,8 +713,7 @@ yield(void)
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		//If process has higher than the current highest priority...
  		if(p->priority < currentHighestPriority && p->priority > 0){
-			//Interrupt!
-			procdump();	
+			//Interrupt!	
 			myproc()->state = RUNNABLE;
 			sched();
 			break;
