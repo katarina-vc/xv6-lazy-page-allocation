@@ -15,7 +15,7 @@
 The Makefile has been modified to support a new flag `SCHEDULER`. When the program is compiled with `make qemu-nox`, the `SCHEDULER` flag is set to `DEFAULT` to enter into the scheduler that came with xv6. You can switch to the FIFO and priority scheduler by compiling with `make qemu-nox SCHEDULER=FIFO` and `make qemu-nox SCHEDULER=PRIORITY` respectively.
 
 ### `time_scheduled()` System Call
-
+To implement time_scheduled(), we first added three fields to the PCB (process struct). pUptime, for the total uptime (aka the total amount of ticks the time is in a RUNNING state), pStartUptime (to stamp the starting time for the process), and pEndUptime (to stamp the ending tmie for the process). Then in proc.c, for each scheduler, when a process is set to a RUNNING state we first check if it's run before. If it has, then we calculate the total uptime and reset the start and end uptime fields. We then restart the start uptime. When a process moves from a running state to any other state (assuming it isn't just done), or if it's still running, we grab the total uptime which is the endUptime minus the startUptime.
 
 ### Basic Scheduler - FIFO
 For this project, we decided to implement a FIFO Scheduler. This scheduler works by searching through the process table for the first runnable process. Once the first runnable process was found, the context switch will be performed to this process. Consequently, this process will be getting resources since it will be the first one in the process table. Once the process is done executing, it will be removed from the process table or its status will be changed from RUNNING, and the next RUNNING process will recieve CPU resources. 
