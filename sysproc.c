@@ -83,6 +83,8 @@ sys_getpid(void)
 int
 sys_sbrk(void)
 {
+  //JTM - Old implementation of sbrk
+  /*
   int addr;
   int n;
 
@@ -91,6 +93,20 @@ sys_sbrk(void)
   addr = myproc()->sz;
   if(growproc(n) < 0)
     return -1;
+  return addr;
+  */
+
+  //JTM - New implementation of sbrk for lazy page allocation
+  int addr;
+  int n;
+
+  if(argint(0, &n) < 0)
+    return -1;
+
+  addr = myproc()->sz;
+  
+  myproc()->sz = myproc()->sz + n;
+
   return addr;
 }
 
