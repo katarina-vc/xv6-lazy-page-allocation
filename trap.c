@@ -145,7 +145,7 @@ trap(struct trapframe *tf)
 		panic("Trap 14: kalloc() returned 0 before mappages().");
 	}
 
-	mappages(myproc()->pgdir, (void*)rcr2(), myproc()->sz, V2P(mem), PTE_W|PTE_U);
+	mappages(myproc()->pgdir, (void*)rcr2(), PGSIZE, V2P(mem), PTE_W|PTE_U);
 
 	break;
     }
