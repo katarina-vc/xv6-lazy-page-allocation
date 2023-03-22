@@ -221,6 +221,7 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 int
 allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
+  cprintf("Entering allocuvm(). Old size: %d. New size: %d.\n", oldsz, newsz);
   char *mem;
   uint a;
 
@@ -231,6 +232,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 
   a = PGROUNDUP(oldsz);
   for(; a < newsz; a += PGSIZE){
+    cprintf("Allocating new page. Address: 0x%x.\n", a);
     mem = kalloc();
     if(mem == 0){
       cprintf("allocuvm out of memory\n");
@@ -255,6 +257,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 int
 deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
+  cprintf("Entering deallocuvm(). Old size: %d. New size: %d.\n", oldsz, newsz);
   pte_t *pte;
   uint a, pa;
 
@@ -268,8 +271,9 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
     else if((*pte & PTE_P) != 0){
       pa = PTE_ADDR(*pte);
-      if(pa == 0)
+      if(pa == 0){
         panic("kfree");
+      }
       char *v = P2V(pa);
       kfree(v);
       *pte = 0;

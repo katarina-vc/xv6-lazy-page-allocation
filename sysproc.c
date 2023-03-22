@@ -97,6 +97,7 @@ sys_sbrk(void)
   */
 
   //JTM - New implementation of sbrk for lazy page allocation
+  
   int addr;
   int n;
 
@@ -108,6 +109,7 @@ sys_sbrk(void)
   myproc()->sz = myproc()->sz + n;
 
   return addr;
+  
 }
 
 int

@@ -79,6 +79,39 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
   return 0;
 }
 
+// JTM - Stole allocuvm() from vm.c, except we are just making it allocate from the faulting address up to the new process size.
+int
+allocPage(pde_t *pgdir, char* va, uint size)
+{
+	// Variable initialization.
+  	char *mem;
+	uint a;
+
+	// Round down the address to align with page addresses (This ensures we include the faulting address).
+	a = PGROUNDDOWN((uint)va);
+
+	// Allocate pages up to the size of the process (This is similar to allocuvm()).
+	for(; a < size; a += PGSIZE){
+		cprintf("Allocating address 0x%x.\n", a);
+  		mem = kalloc();
+  
+  		if(mem == 0){
+      			cprintf("allocPage: kalloc() failed to allocate.\n");
+      			return 0;
+    		}
+
+   		memset(mem, 0, PGSIZE);
+    
+		if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
+      			cprintf("allocPage: mappages() failed to allocate.\n");
+      			kfree(mem);
+      			return 0;
+    		}
+	}
+  
+  return 1;
+}
+
 
 //PAGEBREAK: 41
 void
@@ -138,15 +171,20 @@ trap(struct trapframe *tf)
     //JTM - Check if the error was a page fault
     
     if(tf->trapno == 14){
-	// Allocate page lazily
-	char* mem;
+	// Allocate page lazily. Implement similar growproc() behavior.
+	struct proc *currentProcess = myproc();
+	uint size = currentProcess->sz;
 
-	if((mem = kalloc()) == 0){
-		panic("Trap 14: kalloc() returned 0 before mappages().");
+	cprintf("Trap 14: Allocating new page lazily.\nComplaining address: 0x%x.\nSize before allocation: %d.\n", rcr2(), size);
+	
+	if((size = allocPage(currentProcess->pgdir, (char*)rcr2(), size)) == 0){
+		panic("allocPage: failed to allocate new page.");
 	}
 
-	mappages(myproc()->pgdir, (void*)rcr2(), PGSIZE, V2P(mem), PTE_W|PTE_U);
+	cprintf("Trap handled.\n");
 
+	switchuvm(currentProcess);
+	
 	break;
     }
     
