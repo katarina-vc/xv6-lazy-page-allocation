@@ -16,8 +16,6 @@
 int
 main(int argc, char *argv[])
 {
-  			    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n stressfs starting uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
   int fd, i;
   char path[] = "stressfs0";
   char data[512];
@@ -47,10 +45,5 @@ main(int argc, char *argv[])
 
   wait();
 
-  // KC: Added time_sched checks for Project 2
-  printf(1, "\nRunning user program: stressfs. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-
-  			    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n stressfs ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
   exit();
 }

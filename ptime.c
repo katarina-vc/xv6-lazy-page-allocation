@@ -11,7 +11,6 @@ void  prioritySchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nstressfs arrival time: %d\n", uptime());
 			pid2 = fork();
 			if (pid2 == 0) {
 				set_sched_priority(3);
@@ -24,7 +23,6 @@ void  prioritySchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nuniq arrival time: %d\n", uptime());
 			pid3 = fork();
 
 			if (pid3 == 0) {
@@ -38,7 +36,6 @@ void  prioritySchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nfind arrival time: %d\n", uptime());
 			pid4 = fork();
 
 			if (pid4 == 0) {
@@ -62,7 +59,6 @@ void  defaultSchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nstressfs arrival time: %d\n", uptime());
 			pid2 = fork();
 			if (pid2 == 0) {
 				// run stressfs user program
@@ -74,7 +70,6 @@ void  defaultSchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nuniq arrival time: %d\n", uptime());
 			pid3 = fork();
 
 			if (pid3 == 0) {
@@ -87,7 +82,6 @@ void  defaultSchedulerPTime() {
 
 		if(getpid() == parentPid) {
 			sleep(10);
-			printf(1, "\nfind arrival time: %d\n", uptime());
 			pid4 = fork();
 
 			if (pid4 == 0) {

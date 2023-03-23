@@ -95,10 +95,6 @@ uniq(int fileDescriptor, int flags[])
 	//Error checking - ensure read() exited successfully
 	if(hasChar < 0){
 		printf(1, "uniq: could not read file\n");
-		    // KC: Added time_sched checks for Project 2
-    printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-			    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 	
@@ -119,8 +115,6 @@ uniq(int fileDescriptor, int flags[])
 int
 main(int argc, char *argv[])
 {
-		    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq starting uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	//Variable definitions
 	int fileDescriptor, argParseIndex;
 	int fileNameLocation = argc - 1;
@@ -132,11 +126,6 @@ main(int argc, char *argv[])
 	//Error checking - Check for too few arguments
 	if(argc < 1){
 		printf(1, "uniq: too few arguments\n");
-
-				    // KC: Added time_sched checks for Project 2
-    printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-			    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 
@@ -145,22 +134,12 @@ main(int argc, char *argv[])
 		printf(1, "\n");
 		uniq(0, flags);
 		printf(1, "\n");
-
-				    // KC: Added time_sched checks for Project 2
-    printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-			    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 	
 	//Error checking - See if file even opens
 	if ((fileDescriptor = open(argv[fileNameLocation],0)) < 0){
 		printf(1, "uniq: %s cannot be opened\n", argv[fileNameLocation]);
-
-				    // KC: Added time_sched checks for Project 2
-    printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-		    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 		exit();
 	}
 
@@ -184,10 +163,5 @@ main(int argc, char *argv[])
 	printf(1, "\n");
 	uniq(fileDescriptor, flags);
 	printf(1, "\n");
-
-			    // KC: Added time_sched checks for Project 2
-    printf(1, "Running user program: uniq. time_scheduled(%d): %d\n", getpid(), time_scheduled(getpid()));
-		    // KC printing out uptime for performance analysis proj 2.
-  printf(1, "\n uniq ending uptime for PID: %d, uptime(): %d\n", getpid(), uptime());
 	exit();
 }
