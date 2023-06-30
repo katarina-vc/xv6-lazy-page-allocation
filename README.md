@@ -1,6 +1,4 @@
-# COP6611.001S23 - Operating Systems - Project 3
-
-## Group Members (Same Team from Projects 1 & 2)
+## Devs
 * Katarina Capalbo 
 * John Maurer
 * Azim Ibragimov
@@ -31,4 +29,4 @@ With this in mind, our trap handler in `trap.c` emulates the behavior of `growpr
 
 ![ls - Lazy Allocation](/Project%203%20Screenshots/ls%20-%20Lazy%20Allocation.PNG)
 
-Screenshots for the other commands can be found in the [Project 3 Screenshots](/Project%203%20Screenshots) folder.
+Screenshots for the other commands can be found in the [Screenshots](/Project%203%20Screenshots) folder.
